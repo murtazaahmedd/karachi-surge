@@ -1,0 +1,11 @@
+{
+  "latitude": 24.875,
+  "longitude": 67.0,
+  "generationtime_ms": 0.04,
+  "utc_offset_seconds": 18000,
+  "timezone": "Asia/Karachi",
+  "timezone_abbreviation": "GMT+5",
+  "elevation": 8.0,
+  "current_units": {"time": "iso8601", "interval": "seconds", "temperature_2m": "°C", "precipitation": "mm", "relative_humidity_2m": "%", "wind_speed_10m": "km/h", "weather_code": "wmo code"},
+  "current": {"time": "2026-11-05T17:45", "interval": 900, "temperature_2m": 27.3, "precipitation": 0.4, "relative_humidity_2m": 61, "wind_speed_10m": 12.6, "weather_code": 61}
+}

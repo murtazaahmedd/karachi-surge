@@ -1,0 +1,82 @@
+city: karachi
+timezone: Asia/Karachi
+weather_point: {lat: 24.86, lon: 67.01}
+
+# Approximate coordinates. sample_point is where TomTom flowSegmentData is queried;
+# it snaps to the nearest road segment, so keep it on the main carriageway.
+corridors:
+  - id: shahrah_e_faisal
+    name: Shahrah-e-Faisal
+    start: {lat: 24.8475, lon: 67.0275}
+    end: {lat: 24.8805, lon: 67.1300}
+    sample_point: {lat: 24.8630, lon: 67.0690}
+  - id: ma_jinnah_road
+    name: MA Jinnah Road
+    start: {lat: 24.8504, lon: 66.9960}
+    end: {lat: 24.8750, lon: 67.0330}
+    sample_point: {lat: 24.8618, lon: 67.0170}
+  - id: lyari_expressway
+    name: Lyari Expressway
+    start: {lat: 24.8710, lon: 66.9870}
+    end: {lat: 24.9450, lon: 67.0900}
+    sample_point: {lat: 24.9000, lon: 67.0250}
+  - id: university_road
+    name: University Road
+    start: {lat: 24.8830, lon: 67.0560}
+    end: {lat: 24.9380, lon: 67.1500}
+    sample_point: {lat: 24.9200, lon: 67.0960}
+  - id: ii_chundrigar_road
+    name: II Chundrigar Road
+    start: {lat: 24.8500, lon: 66.9960}
+    end: {lat: 24.8510, lon: 67.0150}
+    sample_point: {lat: 24.8495, lon: 67.0060}
+  - id: clifton_do_talwar
+    name: Clifton / Do Talwar
+    start: {lat: 24.8270, lon: 67.0310}
+    end: {lat: 24.8170, lon: 67.0330}
+    sample_point: {lat: 24.8200, lon: 67.0320}
+  - id: saddar
+    name: Saddar
+    start: {lat: 24.8565, lon: 67.0255}
+    end: {lat: 24.8615, lon: 67.0305}
+    sample_point: {lat: 24.8590, lon: 67.0280}
+  - id: tariq_road
+    name: Tariq Road
+    start: {lat: 24.8720, lon: 67.0570}
+    end: {lat: 24.8750, lon: 67.0700}
+    sample_point: {lat: 24.8740, lon: 67.0630}
+  - id: rashid_minhas_road
+    name: Gulshan-e-Iqbal (Rashid Minhas Rd)
+    start: {lat: 24.9010, lon: 67.1150}
+    end: {lat: 24.9325, lon: 67.0874}
+    sample_point: {lat: 24.9165, lon: 67.1010}
+  - id: airport_star_gate
+    name: Airport (Star Gate)
+    start: {lat: 24.8790, lon: 67.1270}
+    end: {lat: 24.8930, lon: 67.1830}
+    sample_point: {lat: 24.8870, lon: 67.1515}
+  - id: korangi_road
+    name: Korangi Road
+    start: {lat: 24.8460, lon: 67.0580}
+    end: {lat: 24.8320, lon: 67.1100}
+    sample_point: {lat: 24.8380, lon: 67.0780}
+  - id: khayaban_e_ittehad
+    name: DHA Phase 6 (Khayaban-e-Ittehad)
+    start: {lat: 24.8070, lon: 67.0420}
+    end: {lat: 24.7920, lon: 67.0830}
+    sample_point: {lat: 24.8000, lon: 67.0620}
+  - id: nazimabad
+    name: Nazimabad
+    start: {lat: 24.9050, lon: 67.0290}
+    end: {lat: 24.9170, lon: 67.0330}
+    sample_point: {lat: 24.9120, lon: 67.0300}
+  - id: north_karachi
+    name: North Karachi
+    start: {lat: 24.9620, lon: 67.0630}
+    end: {lat: 24.9830, lon: 67.0640}
+    sample_point: {lat: 24.9700, lon: 67.0600}
+  - id: karsaz
+    name: Karsaz
+    start: {lat: 24.8740, lon: 67.0890}
+    end: {lat: 24.8900, lon: 67.0900}
+    sample_point: {lat: 24.8790, lon: 67.0890}

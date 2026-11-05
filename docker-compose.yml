@@ -1,0 +1,107 @@
+name: karachi-surge
+
+x-python: &python
+  build: .
+  env_file:
+    - path: .env
+      required: false
+  environment:
+    KAFKA_BOOTSTRAP: redpanda:9092
+    PG_DSN: postgresql://surge:surge@timescaledb:5432/surge
+  restart: unless-stopped
+  depends_on:
+    redpanda-init:
+      condition: service_completed_successfully
+
+services:
+  redpanda:
+    image: docker.redpanda.com/redpandadata/redpanda:v26.2.6
+    command:
+      - redpanda start
+      - --kafka-addr internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr internal://redpanda:9092,external://localhost:19092
+      - --schema-registry-addr internal://0.0.0.0:8081,external://0.0.0.0:18081
+      - --rpc-addr redpanda:33145
+      - --advertise-rpc-addr redpanda:33145
+      - --mode dev-container
+      - --smp 1
+    ports:
+      - "19092:19092"
+      - "18081:18081"
+      - "19644:9644"
+    volumes:
+      - redpanda:/var/lib/redpanda/data
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health | grep -E 'Healthy:.+true'"]
+      interval: 5s
+      retries: 20
+
+  redpanda-init:
+    image: docker.redpanda.com/redpandadata/redpanda:v26.2.6
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        for t in traffic.flow weather.current rides.requests dlq.raw; do
+          rpk topic describe "$$t" -X brokers=redpanda:9092 >/dev/null 2>&1 \
+            || rpk topic create "$$t" -p 3 -X brokers=redpanda:9092 || exit 1
+        done
+
+  console:
+    image: docker.redpanda.com/redpandadata/console:v3.13.1
+    depends_on:
+      redpanda:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKERS: redpanda:9092
+      SCHEMAREGISTRY_ENABLED: "true"
+      SCHEMAREGISTRY_URLS: http://redpanda:8081
+      REDPANDA_ADMINAPI_ENABLED: "true"
+      REDPANDA_ADMINAPI_URLS: http://redpanda:9644
+    ports:
+      - "8080:8080"
+
+  timescaledb:
+    image: timescale/timescaledb:latest-pg17
+    environment:
+      POSTGRES_USER: surge
+      POSTGRES_PASSWORD: surge
+      POSTGRES_DB: surge
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Mount the file, not the dir, so the image's own timescaledb init scripts still run.
+      - ./db/init/001_raw_tables.sql:/docker-entrypoint-initdb.d/100_raw_tables.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U surge -d surge"]
+      interval: 5s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  traffic-poller:
+    <<: *python
+    command: ["python", "-m", "producers.traffic_poller"]
+
+  weather-poller:
+    <<: *python
+    command: ["python", "-m", "producers.weather_poller"]
+
+  raw-sink:
+    <<: *python
+    command: ["python", "-m", "processing.sinks.raw_sink"]
+    depends_on:
+      redpanda-init:
+        condition: service_completed_successfully
+      timescaledb:
+        condition: service_healthy
+
+volumes:
+  redpanda:
+  pgdata:
