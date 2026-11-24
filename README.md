@@ -1,8 +1,49 @@
 # Karachi Surge
 
-Real-time traffic and ride-price engine for Karachi. See [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
+**A real-time streaming engine for Karachi traffic and ride prices.** It ingests live traffic and weather
+signals into Kafka (Redpanda), lands them in TimescaleDB, and is being built out to compute surge pricing
+per H3 zone and forecast corridor congestion 30 minutes ahead.
 
-The pipeline is built on replayed NYC/Boston data (Track A) while live Karachi data collects in the background (Track B).
+There is no public Karachi ride or traffic time series, so the pipeline is developed on **real NYC and
+Boston trip data replayed as live streams** (Track A) while **live Karachi data collects in the
+background** (Track B). Full design: [IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md).
+
+## Architecture
+
+```text
+ TomTom traffic API ──► traffic_poller ──┐
+ Open-Meteo weather ──► weather_poller ──┼──► Redpanda (Kafka API) ──► raw_sink ──► TimescaleDB hypertables
+ NYC TLC trips ───────► replay (H3) ─────┘     traffic.flow                │          (idempotent inserts,
+                                               weather.current             │           offsets committed
+                                               rides.requests              └──► dlq.raw  after DB commit)
+
+ Planned: stream processing (windows, joins, watermarks) ─► surge calculator ─► online ML (River)
+          ─► FastAPI (REST + WebSocket) ─► live H3 map dashboard · Grafana
+```
+
+## Status
+
+| Stage | State |
+|---|---|
+| Docker Compose stack: Redpanda, Console, TimescaleDB, Redis | Done |
+| Live Karachi pollers (TomTom traffic, Open-Meteo weather) with retries | Done |
+| NYC TLC replay producer with zone-to-H3 mapping and speed control | Done |
+| Karachi weather backfill since 2022 | Done |
+| Raw sink to TimescaleDB with validation and dead-letter topic | Done |
+| Stream processing, surge pricing, congestion forecast, dashboard | Planned |
+
+## Tech stack
+
+Python · Redpanda (Kafka) · TimescaleDB (PostgreSQL) · Redis · H3 · Docker Compose · uv · pytest
+
+## Engineering highlights
+
+- **Exactly-once-style landing:** inserts use `ON CONFLICT DO NOTHING` and Kafka offsets are committed only
+  after the database commit, so a crash never loses or duplicates an event.
+- **Bad messages never block the stream:** anything that fails schema validation goes to `dlq.raw`.
+- **City abstraction:** corridors and bounds live in `config/cities/karachi.yaml`; replayed NYC zones are
+  mapped to H3 cells so downstream code is the same for every city.
+- **Replay with real event time:** `--speed 60` streams one hour of trips per minute over a chosen date range.
 
 ## Setup
 
